@@ -1,0 +1,4 @@
+configurationset:
+  - configuration:
+      name: mysql_config
+      dsn: STEPZEN_DBDSN

@@ -1,0 +1,85 @@
+type Customer {
+  city: String
+  email: String
+  id: Int!
+  name: String
+  state: String
+  street: String
+  zip: String
+}
+
+"""
+These are some examples of queries generated from the schema. Feel free to modify them or add your own.
+"""
+type Query {
+  getCustomerList: [Customer]
+    @dbquery(type: "mysql", table: "customers", configuration: "mysql_config")
+  getCustomer(id: Int!): Customer
+    @dbquery(type: "mysql", table: "customers", configuration: "mysql_config")
+}
+
+"""
+These are some examples of mutations generated from the schema. Feel free to modify them or add your own.
+"""
+type Mutation {
+  updateCustomer(
+    name: String
+    email: String
+    street: String
+    city: String
+    state: String
+    zip: String
+    id: Int!
+  ): DMLResult
+    @dbquery(
+      type: "mysql"
+      query: """
+      UPDATE customers SET
+        name = IFNULL(?, name),
+        email = IFNULL(?, email),
+        street = IFNULL(?, street),
+        city = IFNULL(?, city),
+        state = IFNULL(?, state),
+        zip = IFNULL(?, zip)
+      WHERE id = ?
+      """
+      configuration: "mysql_config"
+    )
+  updateAndGetCustomer(
+    name: String
+    email: String
+    street: String
+    city: String
+    state: String
+    zip: String
+    id: Int!
+  ): Customer
+    @sequence(
+      steps: [
+        { mutation: "updateCustomer" }
+        { query: "getCustomer", arguments: [{ name: "id", argument: "id" }] }
+      ]
+    )
+
+  insertCustomer(
+    zip: String!
+    city: String!
+    state: String!
+    email: String!
+    street: String!
+    name: String!
+  ): Customer
+    @dbquery(
+      type: "mysql"
+      table: "customers"
+      dml: INSERT
+      configuration: "mysql_config"
+    )
+  deleteCustomer(id: Int!): Customer
+    @dbquery(
+      type: "mysql"
+      table: "customers"
+      dml: DELETE
+      configuration: "mysql_config"
+    )
+}
